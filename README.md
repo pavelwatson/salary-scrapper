@@ -1,1 +1,1 @@
-# salary-scrapper
+Personal project under development
