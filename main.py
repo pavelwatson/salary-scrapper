@@ -1,5 +1,4 @@
 import requests
-from bs4 import BeautifulSoup as bs
 import re
 import ast
 
@@ -17,6 +16,11 @@ def find_salaries(page):
     pattern = re.compile(regex)
     salaries = pattern.findall(page.text)
     return salaries
+
+def make_list_of_dictionaries(salaries):
+    modified_salaries = (salary.replace('"compensation": ', '') + '}' for salary in salaries)
+    dict_salaries = [ast.literal_eval(salary) for salary in modified_salaries]
+    return dict_salaries
 
 page = get_data()
 jobs = find_salaries(page)
