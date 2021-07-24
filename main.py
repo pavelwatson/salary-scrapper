@@ -17,10 +17,12 @@ def find_salaries(page):
     salaries = pattern.findall(page.text)
     return salaries
 
+
 def make_list_of_dictionaries(salaries):
     modified_salaries = (salary.replace('"compensation": ', '') + '}' for salary in salaries)
     dict_salaries = [ast.literal_eval(salary) for salary in modified_salaries]
     return dict_salaries
+
 
 def modify_dictionaries(dict_salaries):
     for dict in dict_salaries:
@@ -35,6 +37,7 @@ def modify_dictionaries(dict_salaries):
         dict.pop('to', None)
         dict.pop('from', None)
 
+
 def convect_currency_to_usd(dict_salaries):
     for dict in dict_salaries:
         if dict['currencyCode'] == 'BYR':
@@ -47,6 +50,24 @@ def convect_currency_to_usd(dict_salaries):
             dict['salary'] = int(dict['salary'] * 0.0023325)  # convert KZT to USD
         dict['currencyCode'] = 'USD'
 
-page = get_data()
-jobs = find_salaries(page)
-print(len(jobs))
+
+def calculate_average_salary(dict_salaries):
+    salaries = 0
+    for dict in dict_salaries:
+        salaries += dict['salary']
+    num_of_jobs = len(dict_salaries)
+    return round(salaries / num_of_jobs)
+
+
+def main():
+    page = get_data()
+    salaries = find_salaries(page)
+    dict_salaries = make_list_of_dictionaries(salaries)
+    modify_dictionary(dict_salaries)
+    convect_currency_to_usd(dict_salaries)
+    average = calculate_average_salary(dict_salaries)
+    print(f'\nAverage Salary is: {average} USD')
+
+
+if __name__ == '__main__':
+    main()
