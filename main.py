@@ -1,21 +1,32 @@
 from request_functions import get_json
 
-def compare_median_salaries(keywords):
+
+def print_sorted_median_salaries(keywords):
+    all_data = []
     for keyword in keywords:
         salaries = []
-        data = get_all_data(keyword)
-        if (data):
-            for job in data:
+        jobs = get_all_data(keyword)
+        if (jobs):
+            for job in jobs:
                 salaries.append(job['salary'])
             modify_salaries(salaries)
-            li = [dict['salary'] for dict in salaries]
-            ppprint(keyword, li)
+            salaries = [dict['salary'] for dict in salaries]
+            median = calculate_median_salary(salaries)
+            data = (median, keyword, len(jobs))
+            all_data.append(data)
+    pppprint(all_data)
+    # return all_data
 
 
-def ppprint(keyword, salaries):
-    median = calculate_median_salary(salaries)
-    print(f'{keyword} meadians salary: {median}')
-    
+def pppprint(all_data):
+    all_data.sort(reverse=True)
+    for job in all_data:
+        median = job[0]
+        keyword = job[1]
+        quanity = job[2]
+        print(f'{keyword} median salary: {median} (for {quanity} jobs)')
+
+  
 def get_all_data(keyword):
     json_data = get_json(keyword)
     if json_data['found'] < 50:
@@ -27,9 +38,11 @@ def get_all_data(keyword):
         return singlepage + multiplepage
     return singlepage
 
+
 def get_singepage_data(json_data):
     page_vacancies = json_data['items']
     return page_vacancies
+
 
 def get_multiplepage_data(keyword, num_of_pages):
     multiplepage_data = []
@@ -38,11 +51,6 @@ def get_multiplepage_data(keyword, num_of_pages):
         page_ind_data = get_singepage_data(json_data)
         multiplepage_data += page_ind_data
     return multiplepage_data
-
-
-# dicts = get_all_data('Python')
-# salaries = [dict['salary'] for dict in dicts]
-# print(a[0].keys())
 
 
 def calculate_median_salary(salaries):
@@ -60,6 +68,7 @@ def modify_salaries(salaries):
     modify_dictionaries(salaries)
     convect_currency_to_usd(salaries)
     salaries.sort(key=lambda dict: dict['salary'])
+
 
 def modify_dictionaries(listOfDicts_withData):
     for dict in listOfDicts_withData:
@@ -90,11 +99,8 @@ def convect_currency_to_usd(listOfDicts_withData):
         dict['currency'] = 'USD'
 
 
-compare_median_salaries(['Embedded', 'perl', 'Scala', 'Ruby on Rails', 'Golang', 'Django', 'React',
+print_sorted_median_salaries(['Embedded', 'perl', 'Scala', 'Ruby on Rails', 'Golang', 'Django', 'React',
                         '.Net Core', 'Express.js', 'Node', 'Express',
                         'Symfony', 'Laravel', 'Spring Boot',
                         'DevOps', 'System Administrator', 'Security engineer',
                         'Data engineer', 'data analyst'])
-
-# compare_median_salaries('Python', 'Javascript', 'Ruby', 'C++', 'Java', 'C%23', 'TypeScript', 'Go', 'Scala', 'Rust', 'Unity', 'Unreal Engine')
-# compare_median_salaries('Security engineer', 'Ruby')
