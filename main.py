@@ -2,34 +2,33 @@ from request_functions import get_json
 
 
 def print_sorted_median_salaries(keywords):
-    all_data = []
+    summary = []
     for keyword in keywords:
-        salaries = []
-        jobs = get_all_data(keyword)
-        if (jobs):
-            for job in jobs:
-                salaries.append(job['salary'])
-            modify_salaries(salaries)
-            salaries = [dict['salary'] for dict in salaries]
+        vacancies_list = get_keyword_vacancies(keyword) # list of dictionaries, where each dictionary represents a vacancy
+        if (vacancies_list):
+            salaries = get_salaries(vacancies_list)
             median = calculate_median_salary(salaries)
-            data = (median, keyword, len(jobs))
-            all_data.append(data)
-    pppprint(all_data)
-    # return all_data
+            keyword_data = {'keyword': keyword, 'median salary': median, 'number of jobs': len(vacancies_list)}
+            summary.append(keyword_data)
+    pppprint(summary)
 
 
-def pppprint(all_data):
-    all_data.sort(reverse=True)
-    for job in all_data:
-        median = job[0]
-        keyword = job[1]
-        quanity = job[2]
-        print(f'{keyword} median salary: {median} (for {quanity} jobs)')
+def get_salaries(vacancies_list):
+    salaries = [vacancy['salary'] for vacancy in vacancies_list]
+    salaries = modify_salaries(salaries)
+    return salaries
 
-  
-def get_all_data(keyword):
+
+def pppprint(summary_list):
+    summary_list.sort(key=lambda dict: dict['median salary'], reverse=True)
+    print('Search Keyword' + " "*15 + 'Median Salary:' + " "*15 + "Number of Jobs:")
+    for dict in summary_list:
+        print(f'{dict["keyword"]}' + f'{dict["median salary"]}$'.rjust(32-len(dict["keyword"])) + f'{dict["number of jobs"]}'.rjust(32-len(str(dict["median salary"])))) 
+
+    
+def get_keyword_vacancies(keyword):
     json_data = get_json(keyword)
-    if json_data['found'] < 50:
+    if json_data['found'] < 45:
         return print(f'Not enough data for {keyword}')
     singlepage = get_singepage_data(json_data)
     num_of_pages = json_data['pages']
@@ -65,12 +64,14 @@ def calculate_median_salary(salaries):
 
 
 def modify_salaries(salaries):
-    modify_dictionaries(salaries)
+    modify_salary_dictionaries(salaries)
     convect_currency_to_usd(salaries)
     salaries.sort(key=lambda dict: dict['salary'])
+    salaries_list = [dict['salary'] for dict in salaries]
+    return salaries_list
 
 
-def modify_dictionaries(listOfDicts_withData):
+def modify_salary_dictionaries(listOfDicts_withData):
     for dict in listOfDicts_withData:
         if dict['from'] and dict['to']:
             avg_salary = (dict['from'] + dict['to']) / 2
@@ -101,6 +102,14 @@ def convect_currency_to_usd(listOfDicts_withData):
 
 print_sorted_median_salaries(['Embedded', 'perl', 'Scala', 'Ruby on Rails', 'Golang', 'Django', 'React',
                         '.Net Core', 'Express.js', 'Node', 'Express',
-                        'Symfony', 'Laravel', 'Spring Boot',
+                        'Symfony', 'Laravel', 'Spring',
                         'DevOps', 'System Administrator', 'Security engineer',
-                        'Data engineer', 'data analyst'])
+                        'Data engineer', 'data analyst', 'Robotics', 'Microcontrollers', 'Android', 'kotlin',
+                        'Unity', "Unreal Engine", "Machine Learning", "Data science", 'Artificial intelligence',
+                         'Встроенное по', 'Network engineer', 'swift'])
+
+# print_sorted_median_salaries(['Frontend', 'Backend', 'Web development', 
+#                                      'Data Science', 'Data Engineering', 'Mobile Development',
+#                                      'Android', 'IOS', 'User Experience', 'Virtual Reality',
+#                                      'Games Development', 'Machine Learning', 'IOT', 'Internet of Things',
+#                                      'Physical Computing', 'R&D'])
